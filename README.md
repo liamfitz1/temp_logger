@@ -6,4 +6,5 @@ I created:
 - lib/temp_logger.py
 - lib/wifi_manager.py
 - main.py
+
 The other files (microdot.py, sdcard.py) are not mine.
