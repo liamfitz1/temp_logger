@@ -40,7 +40,7 @@ async def background_loop():
 
 
 async def main():
-    """Main function set to run when the Pico boots up."""
+    """Runs automatically when the Pico initializes after boot."""
     print("Starting server...")
     uasyncio.create_task(background_loop())
     print("Started background_loop CSV logging...")

@@ -26,21 +26,22 @@ class TempLogger:
 
     def __str__(self):
         """String output."""
+        (year, month, day, hour, minute, second, *_) = time.localtime()
         return (f"{self.__location}\n"
                 f"{str(self.__dht.get_temp_c())}*C,\n"
                 f"{str(self.to_fahrenheit(self.__dht.get_temp_c()))}*F,\n"
                 f"{str(self.__dht.get_humidity())}%\n"
-                f"{time.localtime()}"
+                f"{month}/{day}/{year} @ {hour}:{minute}:{second:02}"
                 )
 
-    def to_fahrenheit(self, celcius):
+    def to_fahrenheit(self, celsius):
         """Calculte fahrenheit based on celsius."""
-        return celcius * 9.0 / 5.0 + 32.0
+        return celsius * 9.0 / 5.0 + 32.0
 
     def to_json(self):
         """Output JSON."""
         return json.dumps({
-            'celcius': self.__dht.get_temp_c(),
+            'celsius': self.__dht.get_temp_c(),
             'fahrenheit': self.to_fahrenheit(self.__dht.get_temp_c()),
             'humidity': self.__dht.get_humidity(),
             'date': time.localtime()
