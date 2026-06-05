@@ -12,6 +12,7 @@ import dht
 
 class DHTManager:
     """DHT Module reads temperature and humidity."""
+    
     def __init__(self, gpio_pin):
         self.sensor = dht.DHT11(machine.Pin(gpio_pin))
         self.__last_measure = time.ticks_ms()
