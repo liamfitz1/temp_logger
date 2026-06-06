@@ -19,14 +19,12 @@ class TempLogger:
         self.__dht = DHTManager(gpio_pin=15)
         self.__sd_card = SDManager(baudrate=1_000_000)
         self.__location = location
-
         self.__wifi.connect()
-
         self.__sd_card.mount()
 
     def __str__(self):
         """String output."""
-        (year, month, day, hour, minute, second, *_) = time.localtime()
+        (year, month, day, hour, minute, second) = time.localtime()[:6]
         return (f"{self.__location}\n"
                 f"{str(self.__dht.get_temp_c())}*C,\n"
                 f"{str(self.to_fahrenheit(self.__dht.get_temp_c()))}*F,\n"
