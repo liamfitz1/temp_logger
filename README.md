@@ -1,5 +1,6 @@
 # temp_logger
-Runs a Pi Pico and monitors environment temperatures.
+Runs a Pi Pico and monitors environment temperatures with a DHT11 module.
+
 I created:
 - lib/dht_manager.py
 - lib/sd_manager.py
