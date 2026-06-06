@@ -22,7 +22,7 @@ class WifiManager:
         while not self.wlan.isconnected():
             print(f"Connecting to {self.__ssid}...")
             self.wlan.connect(self.__ssid, self.__password)
-            time.sleep(1)
+            time.sleep(3)
         print(f"Connected to {self.__ssid}.")
         return self.wlan.isconnected()
 
@@ -30,7 +30,6 @@ class WifiManager:
         """Disconnects from the network."""
         while self.wlan.isconnected():
             self.wlan.disconnect()
-            time.sleep(1)
         print(f"Disconnected from {self.__ssid}")
 
     def ip_addr_show(self):
