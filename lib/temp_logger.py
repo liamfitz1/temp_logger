@@ -52,7 +52,11 @@ class TempLogger:
                 temp_f = self.to_fahrenheit(temp_c)
                 humidity = self.__dht.get_humidity()
                 timex = time.localtime()
-                outfile.write(f"{self.__location},{temp_c},{temp_f},{humidity},{timex}\n")
+                outfile.write(
+                    f"{self.__location},"
+                    f"{temp_c},{temp_f},"
+                    f"{humidity},{timex}\n"
+                )
         except OSError as e:
             print(f"Exception: {e}")
 
@@ -63,7 +67,7 @@ class TempLogger:
     def get_ip(self):
         """Getter for IP."""
         return self.__wifi.ip_addr_show()
-    
+
     def get_date(self):
         """Getter for date."""
         (year, month, day, hour, minute, second) = time.localtime()[:6]
