@@ -24,12 +24,11 @@ class TempLogger:
 
     def __str__(self):
         """String output."""
-        (year, month, day, hour, minute, second) = time.localtime()[:6]
         return (f"{self.__location}\n"
                 f"{str(self.__dht.get_temp_c())}*C,\n"
                 f"{str(self.to_fahrenheit(self.__dht.get_temp_c()))}*F,\n"
                 f"{str(self.__dht.get_humidity())}%\n"
-                f"{month:02}/{day:02}/{year}, {hour:02}:{minute:02}:{second:02}"
+                f"{self.get_date()}"
                 )
 
     def to_fahrenheit(self, celsius):
@@ -42,7 +41,7 @@ class TempLogger:
             'celsius': self.__dht.get_temp_c(),
             'fahrenheit': self.to_fahrenheit(self.__dht.get_temp_c()),
             'humidity': self.__dht.get_humidity(),
-            'date': time.localtime()
+            'date': self.get_date()
         })
 
     def to_csv(self):
@@ -64,3 +63,8 @@ class TempLogger:
     def get_ip(self):
         """Getter for IP."""
         return self.__wifi.ip_addr_show()
+    
+    def get_date(self):
+        """Getter for date."""
+        (year, month, day, hour, minute, second) = time.localtime()[:6]
+        return f"{month:02}/{day:02}/{year}, {hour:02}:{minute:02}:{second:02}"
