@@ -29,7 +29,7 @@ class TempLogger:
                 f"{str(self.to_fahrenheit(self.__dht.get_temp_c()))}*F,\n"
                 f"{str(self.__dht.get_humidity())}%\n"
                 f"{self.get_date()}"
-                )
+        )
 
     def to_fahrenheit(self, celsius):
         """Calculte fahrenheit based on celsius."""
@@ -51,11 +51,11 @@ class TempLogger:
                 temp_c = self.__dht.get_temp_c()
                 temp_f = self.to_fahrenheit(temp_c)
                 humidity = self.__dht.get_humidity()
-                timex = time.localtime()
+                current_time = self.get_date()
                 outfile.write(
                     f"{self.__location},"
                     f"{temp_c},{temp_f},"
-                    f"{humidity},{timex}\n"
+                    f"{humidity},{current_time}\n"
                 )
         except OSError as e:
             print(f"Exception: {e}")

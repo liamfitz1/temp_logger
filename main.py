@@ -4,8 +4,9 @@ temperature sensor, we have a working temperature logger.
 It logs to a CSV file, web interface, and a json end-point.
 """
 from temp_logger import TempLogger
-from microdot import Microdot, Response
+from microdot import Microdot, Response, send_file
 import uasyncio
+import os
 
 logger = TempLogger("Garage")
 
@@ -26,6 +27,12 @@ async def json(request):
     """Return JSON formatted temperature data."""
     return Response(body=logger.to_json(),
                     headers={'Content-Type': 'application/json'})
+
+@app.route('/api/v1/csv')
+async def csv(request):
+    """Send a .csv formatted file to browser."""
+    print(os.listdir())
+    return send_file("sd/logger.csv")
 
 
 async def background_loop():

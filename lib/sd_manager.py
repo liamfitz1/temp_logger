@@ -9,7 +9,9 @@ import uos
 
 class SDManager:
     """Handle the SD Card module."""
-    def __init__(self, spi_id=1, sck=10, mosi=11, miso=12, cs=13, baudrate=1_000_000):
+
+    def __init__(self, spi_id=1, sck=10,
+                 mosi=11, miso=12, cs=13, baudrate=1_000_000):
         """Handle all SDCard module configuration."""
         self.spi = machine.SPI(
             spi_id,
