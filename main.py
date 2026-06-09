@@ -6,9 +6,11 @@ It logs to a CSV file, web interface, and a json end-point.
 from temp_logger import TempLogger
 from microdot import Microdot, Response, send_file
 import uasyncio
+import ntptime, time
 import os
 
-logger = TempLogger("Garage")
+# TempLogger( Location, Minutes )
+logger = TempLogger("Garage", 5)
 
 if logger.get_ip():
     print(logger.get_ip()[0])
@@ -43,11 +45,12 @@ async def background_loop():
         except OSError as e:
             print(f"Background error: {e}")
             break
-        await uasyncio.sleep(60)
+        await uasyncio.sleep(logger.get_sleep())
 
 
 async def main():
     """Runs automatically when the Pico initializes after boot."""
+    print(f"Localtime sync: {time.localtime()}")
     print("Starting server...")
     uasyncio.create_task(background_loop())
     print("Started background_loop CSV logging...")

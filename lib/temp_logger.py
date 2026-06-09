@@ -13,12 +13,13 @@ from sd_manager import SDManager
 class TempLogger:
     """Main object for the program."""
 
-    def __init__(self, location="Default"):
+    def __init__(self, location="Default", sleep_min=1):
         """Initialize the logger."""
         self.__wifi = WifiManager(secrets.ssid, secrets.password)
         self.__dht = DHTManager(gpio_pin=15)
         self.__sd_card = SDManager(baudrate=1_000_000)
         self.__location = location
+        self.__sleep_min = sleep_min
         self.__wifi.connect()
         self.__sd_card.mount()
 
@@ -72,3 +73,6 @@ class TempLogger:
         """Getter for date."""
         (year, month, day, hour, minute, second) = time.localtime()[:6]
         return f"{month:02}/{day:02}/{year}, {hour:02}:{minute:02}:{second:02}"
+
+    def get_sleep(self):
+        return 60 * self.__sleep_min
