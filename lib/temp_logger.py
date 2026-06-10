@@ -30,7 +30,7 @@ class TempLogger:
                 f"{str(self.__dht.get_temp_c())}*C,\n"
                 f"{str(self.to_fahrenheit(self.__dht.get_temp_c()))}*F,\n"
                 f"{str(self.__dht.get_humidity())}%\n"
-                f"{self.get_date()}"
+                f"{self.__wifi.get_date()}"
         )
 
     def to_fahrenheit(self, celsius):
