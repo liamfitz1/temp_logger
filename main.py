@@ -12,6 +12,7 @@ import os
 # TempLogger( Location, Minutes )
 logger = TempLogger("Garage", 5)
 
+
 if logger.get_ip():
     print(logger.get_ip()[0])
 

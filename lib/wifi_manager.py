@@ -45,7 +45,14 @@ class WifiManager:
 
     def get_time(self):
         UTC_OFFSET = -7 * 3600
-        ntptime.settime()
-        utc_time = time.localtime()
+        while True:
+            try:
+                ntptime.settime()
+                utc_time = time.localtime()
+                break
+            except OSError as e:
+                print(f"{e} ntp time error.")
+                time.sleep(2)
         local_time = time.localtime(time.mktime(utc_time) + UTC_OFFSET)
-        return local_time
+        (year, month, day, hour, minute, second) = local_time[:6]
+        return f"{year}/{month}/{day:02},{hour:02}:{minute:02}:{second:02}"

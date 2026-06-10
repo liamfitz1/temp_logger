@@ -4,7 +4,7 @@ a write function, to write data to specified file.
 """
 import machine
 import sdcard
-import uos
+import uos, time
 
 
 class SDManager:
@@ -29,14 +29,17 @@ class SDManager:
 
     def mount(self, mount_point="/sd"):
         """Create mount point."""
-        try:
-            self.sd = sdcard.SDCard(self.spi, self.cs)
-            self.vfs = uos.VfsFat(self.sd)
-            uos.mount(self.vfs, mount_point)
-        except OSError as e:
-            print(f"Failed to mount SD Card: {e}")
-        else:
-            print(f"SD Card mounted at {mount_point}")
+        while True:
+            try:
+                self.sd = sdcard.SDCard(self.spi, self.cs)
+                self.vfs = uos.VfsFat(self.sd)
+                uos.mount(self.vfs, mount_point)
+                break
+            except OSError as e:
+                print(f"Failed to mount SD Card: {e}")
+                time.sleep(1)
+            else:
+                print(f"SD Card mounted at {mount_point}")
 
     def umount(self, mount_point="/sd"):
         """Unmount."""
