@@ -2,6 +2,7 @@
 Connect the Pico to a network.
 """
 import time
+import ntptime
 import network
 
 
@@ -41,3 +42,10 @@ class WifiManager:
             # 3 - DNS
             return self.wlan.ifconfig()
         return None
+
+    def get_time(self):
+        UTC_OFFSET = -7 * 3600
+        ntptime.settime()
+        utc_time = time.localtime()
+        local_time = time.localtime(time.mktime(utc_time) + UTC_OFFSET)
+        return local_time

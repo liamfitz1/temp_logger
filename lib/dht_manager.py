@@ -40,18 +40,15 @@ class DHTManager:
 
     def get_temp_c(self):
         """Getter which returns temperature as C."""
-        if time.ticks_diff(time.ticks_ms(), self.__last_measure) <= 2000:
-            self._ensure_measure()
+        self._ensure_measure()
         return self.__temperature
 
     def get_temp_f(self):
         """Getter which returns temperature as C, to convert to F."""
-        if time.ticks_diff(time.ticks_ms(), self.__last_measure) <= 2000:
-            self._ensure_measure()
+        self._ensure_measure()
         return self.__temperature
 
     def get_humidity(self):
         """Getter returns humidity %."""
-        if time.ticks_diff(time.ticks_ms(), self.__last_measure) <= 2000:
-            self._ensure_measure()
+        self._ensure_measure()
         return self.__humidity

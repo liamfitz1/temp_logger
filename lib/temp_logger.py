@@ -21,6 +21,7 @@ class TempLogger:
         self.__location = location
         self.__sleep_min = sleep_min
         self.__wifi.connect()
+        print(f"LOCAL TIME: {self.__wifi.get_time()}")
         self.__sd_card.mount()
 
     def __str__(self):
@@ -72,7 +73,7 @@ class TempLogger:
     def get_date(self):
         """Getter for date."""
         (year, month, day, hour, minute, second) = time.localtime()[:6]
-        return f"{month:02}/{day:02}/{year}, {hour:02}:{minute:02}:{second:02}"
+        return f"{month:02}/{day:02}/{year},{hour:02}:{minute:02}:{second:02}"
 
     def get_sleep(self):
         return 60 * self.__sleep_min
