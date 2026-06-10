@@ -30,7 +30,7 @@ class TempLogger:
                 f"{str(self.__dht.get_temp_c())}*C,\n"
                 f"{str(self.to_fahrenheit(self.__dht.get_temp_c()))}*F,\n"
                 f"{str(self.__dht.get_humidity())}%\n"
-                f"{self.__wifi.get_date()}"
+                f"{self.__wifi.get_time()}"
         )
 
     def to_fahrenheit(self, celsius):
@@ -43,7 +43,7 @@ class TempLogger:
             'celsius': self.__dht.get_temp_c(),
             'fahrenheit': self.to_fahrenheit(self.__dht.get_temp_c()),
             'humidity': self.__dht.get_humidity(),
-            'date': self.__wifi.get_date()
+            'date': self.__wifi.get_time()
         })
 
     def to_csv(self):
@@ -53,7 +53,7 @@ class TempLogger:
                 temp_c = self.__dht.get_temp_c()
                 temp_f = self.to_fahrenheit(temp_c)
                 humidity = self.__dht.get_humidity()
-                current_time = self.__wifi.get_date()
+                current_time = self.__wifi.get_time()
                 outfile.write(
                     f"{self.__location},"
                     f"{temp_c},{temp_f},"
