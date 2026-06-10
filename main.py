@@ -34,8 +34,7 @@ async def json(request):
 async def csv(request):
     """Send a .csv formatted file to browser."""
     print(os.listdir())
-    os.chdir("/sd")
-    return send_file("logger.csv")
+    return send_file("sd/logger.csv")
 
 
 async def background_loop():
