@@ -6,7 +6,7 @@ It logs to a CSV file, web interface, and a json end-point.
 from temp_logger import TempLogger
 from microdot import Microdot, Response, send_file
 import uasyncio
-import ntptime, time
+import time
 import os
 
 # TempLogger( Location, Minutes )
