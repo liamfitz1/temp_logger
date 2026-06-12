@@ -33,21 +33,28 @@ async def json(request):
 
 @app.route('/api/v1/csv')
 async def csv(request):
-    """Send a .csv formatted file to browser."""
-    print(os.listdir())
-    return send_file("sd/logger.csv")
+    with open('/sd/logger.csv', 'r') as f:
+        data = f.read()
 
+    return Response(
+        data,
+        headers={
+            'Content-Type': 'text/csv'
+        }
+    )
 
 async def background_loop():
     """Background loop to continually log to CSV file."""
-    while True:
-        try:
-            logger.to_csv()
-        except OSError as e:
-            print(f"Background error: {e}")
-            break
-        await uasyncio.sleep(logger.get_sleep())
-
+    if logger.is_mounted():
+        while True:
+            try:
+                logger.to_csv()
+            except OSError as e:
+                print(f"Background error: {e}")
+                break
+            await uasyncio.sleep(logger.get_sleep())
+    else:
+        print("Not mounted. background_loop()")
 
 async def main():
     """Runs automatically when the Pico initializes after boot."""

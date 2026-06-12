@@ -10,8 +10,15 @@ import uos, time
 class SDManager:
     """Handle the SD Card module."""
 
-    def __init__(self, spi_id=1, sck=10,
-                 mosi=11, miso=12, cs=13, baudrate=1_000_000):
+    def __init__(
+        self,
+        spi_id=1,
+        sck=10,
+        mosi=11,
+        miso=12,
+        cs=13,
+        baudrate=1_000_000
+        ):
         """Handle all SDCard module configuration."""
         self.spi = machine.SPI(
             spi_id,
@@ -26,6 +33,7 @@ class SDManager:
         self.sd = None
         self.vfs = None
         self.mount_point = "/sd"
+        self.mounted = False
 
     def mount(self, mount_point="/sd"):
         """Create mount point."""
@@ -34,12 +42,13 @@ class SDManager:
                 self.sd = sdcard.SDCard(self.spi, self.cs)
                 self.vfs = uos.VfsFat(self.sd)
                 uos.mount(self.vfs, mount_point)
+                self.mounted = True
                 break
             except OSError as e:
                 print(f"Failed to mount SD Card: {e}")
                 time.sleep(1)
-            else:
-                print(f"SD Card mounted at {mount_point}")
+            
+        print(f"SD Card mounted at {mount_point}")
 
     def umount(self, mount_point="/sd"):
         """Unmount."""
@@ -49,13 +58,14 @@ class SDManager:
             print(f"Failed to unmount: {e}")
         else:
             print(f"Unmounted: {mount_point}")
+        self.mounted = False
 
     def write(self, text, mount_point="/sd"):
         """Writes to specified file at mount point."""
         try:
-            with open(f"{mount_point}/logger.txt", "a") as file:
+            with open(f"{mount_point}/logger.txt",
+                      "a") as file:
                 file.write(text + "\n")
-                file.flush()
         except Exception as e:
             print(f"Error writing file: {e}")
         else:

@@ -21,7 +21,7 @@ class TempLogger:
         self.__location = location
         self.__sleep_min = sleep_min
         self.__wifi.connect()
-        print(f"LOCAL TIME: {self.__wifi.get_time()}")
+        #print(f"LOCAL TIME: {self.__wifi.get_time()}")
         self.__sd_card.mount()
 
     def __str__(self):
@@ -48,19 +48,22 @@ class TempLogger:
 
     def to_csv(self):
         """Writes to a CSV file."""
-        try:
-            with open('/sd/logger.csv', 'a') as outfile:
-                temp_c = self.__dht.get_temp_c()
-                temp_f = self.to_fahrenheit(temp_c)
-                humidity = self.__dht.get_humidity()
-                current_time = self.__wifi.get_time()
-                outfile.write(
-                    f"{self.__location},"
-                    f"{temp_c},{temp_f},"
-                    f"{humidity},{current_time}\n"
-                )
-        except OSError as e:
-            print(f"Exception: {e}")
+        if self.__sd_card.mounted:
+            try:
+                with open('/sd/logger.csv', 'a') as outfile:
+                    temp_c = self.__dht.get_temp_c()
+                    temp_f = self.to_fahrenheit(temp_c)
+                    humidity = self.__dht.get_humidity()
+                    current_time = self.__wifi.get_time()
+                    outfile.write(
+                        f"{self.__location},"
+                        f"{temp_c},{temp_f},"
+                        f"{humidity},{current_time}\n"
+                    )
+            except OSError as e:
+                print(f"Exception: {e}")
+        else:
+            print("Not mounted. write()")
 
     def get_location(self):
         """Getter for location."""
@@ -77,3 +80,6 @@ class TempLogger:
 
     def get_sleep(self):
         return 60 * self.__sleep_min
+    
+    def is_mounted(self):
+        return self.__sd_card.mounted
