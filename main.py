@@ -5,6 +5,7 @@ It logs to a CSV file, web interface, and a json end-point.
 """
 from temp_logger import TempLogger
 from microdot import Microdot, Response, send_file
+#from microdot.utemplate import Template
 import uasyncio
 import time
 import os
@@ -23,6 +24,7 @@ app = Microdot()
 async def index(request):
     """Index function."""
     return str(logger)
+    #return Template('index.html').render(logger=str(logger))
 
 
 @app.route('/api/v1/json')
@@ -49,6 +51,7 @@ async def background_loop():
         while True:
             try:
                 logger.to_csv()
+                print("logged to CSV file.")
             except OSError as e:
                 print(f"Background error: {e}")
                 break
