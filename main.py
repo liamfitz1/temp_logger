@@ -9,6 +9,14 @@ from microdot import Microdot, Response, send_file
 import uasyncio
 import time
 import os
+from machine import Pin
+
+led = Pin("LED", Pin.OUT)
+def debug_led(led):
+	led.on()
+	time.sleep(1)
+	led.off()
+
 
 # TempLogger( Location, Minutes )
 logger = TempLogger("Garage", 5)
@@ -16,13 +24,16 @@ logger = TempLogger("Garage", 5)
 
 if logger.get_ip():
     print(logger.get_ip()[0])
+    debug_led(led)
 
+	
 app = Microdot()
 
 
 @app.route('/')
 async def index(request):
     """Index function."""
+    debug_led(led)
     return str(logger)
     #return Template('index.html').render(logger=str(logger))
 
@@ -52,6 +63,7 @@ async def background_loop():
             try:
                 logger.to_csv()
                 print("logged to CSV file.")
+                debug_led(led)
             except OSError as e:
                 print(f"Background error: {e}")
                 break
