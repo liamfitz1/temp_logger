@@ -23,7 +23,7 @@ logger = TempLogger("Garage", 5)
 
 
 if logger.get_ip():
-    print(logger.get_ip()[0])
+    print(logger.get_ip())
     debug_led(led)
 
 	
@@ -46,7 +46,7 @@ async def json(request):
 
 @app.route('/api/v1/csv')
 async def csv(request):
-    with open('/sd/logger.csv', 'r') as f:
+    with open(logger.__sd_card.filename, 'r') as f:
         data = f.read()
 
     return Response(
