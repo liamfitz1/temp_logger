@@ -21,8 +21,8 @@ class TempLogger:
         self.__location = location
         self.__sleep_min = sleep_min
         self.__wifi.connect()
-        #print(f"LOCAL TIME: {self.__wifi.get_time()}")
-        self.__sd_card.mount()
+        print(f"LOCAL TIME: {self.get_date()}")
+        self.__sd_card.mount_sd()
 
     def __str__(self):
         """String output."""
@@ -30,7 +30,7 @@ class TempLogger:
                 f"{str(self.__dht.get_temp_c())}*C,\n"
                 f"{str(self.to_fahrenheit(self.__dht.get_temp_c()))}*F,\n"
                 f"{str(self.__dht.get_humidity())}%\n"
-                f"{self.__wifi.get_time()}"
+                f"{self.get_date()}"
         )
 
     def to_fahrenheit(self, celsius):
@@ -43,18 +43,18 @@ class TempLogger:
             'celsius': self.__dht.get_temp_c(),
             'fahrenheit': self.to_fahrenheit(self.__dht.get_temp_c()),
             'humidity': self.__dht.get_humidity(),
-            'date': self.__wifi.get_time()
+            'date': self.get_date()
         })
 
     def to_csv(self):
         """Writes to a CSV file."""
-        if self.__sd_card.mounted:
+        if self.__sd_card.is_mounted:
             try:
-                with open('/sd/logger.csv', 'a') as outfile:
+                with open(self.__sd_card.filename, 'a') as outfile:
                     temp_c = self.__dht.get_temp_c()
                     temp_f = self.to_fahrenheit(temp_c)
                     humidity = self.__dht.get_humidity()
-                    current_time = self.__wifi.get_time()
+                    current_time = self.get_date()
                     outfile.write(
                         f"{self.__location},"
                         f"{temp_c},{temp_f},"
@@ -71,7 +71,7 @@ class TempLogger:
 
     def get_ip(self):
         """Getter for IP."""
-        return self.__wifi.ip_addr_show()
+        return self.__wifi.ip_addr()
 
     def get_date(self):
         """Getter for date."""
@@ -82,4 +82,4 @@ class TempLogger:
         return 60 * self.__sleep_min
     
     def is_mounted(self):
-        return self.__sd_card.mounted
+        return self.__sd_card.is_mounted

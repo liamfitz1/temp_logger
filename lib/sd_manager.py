@@ -1,15 +1,9 @@
-"""
-Handles creating an SDManager instance, mounting, unmounting, and
-a write function, to write data to specified file.
-"""
 import machine
+import vfs
 import sdcard
-import uos, time
 
 
 class SDManager:
-    """Handle the SD Card module."""
-
     def __init__(
         self,
         spi_id=1,
@@ -17,9 +11,10 @@ class SDManager:
         mosi=11,
         miso=12,
         cs=13,
-        baudrate=1_000_000
-        ):
-        """Handle all SDCard module configuration."""
+        baudrate=1_000_000,
+        mnt="/mnt",
+        outfile="outfile.txt"
+    ):
         self.spi = machine.SPI(
             spi_id,
             baudrate,
@@ -30,43 +25,58 @@ class SDManager:
             miso=machine.Pin(miso)
         )
         self.cs = machine.Pin(cs, machine.Pin.OUT)
-        self.sd = None
+        self.sd_card = None
         self.vfs = None
-        self.mount_point = "/sd"
-        self.mounted = False
+        self.mount_point = mnt
+        self.is_mounted = False
+        self.outfile = outfile
+        self.filename = f"{self.mount_point}/{self.outfile}"
 
-    def mount(self, mount_point="/sd"):
-        """Create mount point."""
-        while True:
+    def mount_sd(self):
+        if not self.is_mounted:
             try:
-                self.sd = sdcard.SDCard(self.spi, self.cs)
-                self.vfs = uos.VfsFat(self.sd)
-                uos.mount(self.vfs, mount_point)
-                self.mounted = True
-                break
+                self.sd_card = sdcard.SDCard(self.spi, self.cs)
+                self.vfs = vfs.VfsFat(self.sd_card)
+                vfs.mount(self.vfs, self.mount_point)
+                self.is_mounted = True
             except OSError as e:
-                print(f"Failed to mount SD Card: {e}")
-                time.sleep(1)
-            
-        print(f"SD Card mounted at {mount_point}")
-
-    def umount(self, mount_point="/sd"):
-        """Unmount."""
-        try:
-            uos.umount(mount_point)
-        except OSError as e:
-            print(f"Failed to unmount: {e}")
+                print(f"Unable to mount {self.mount_point}: {e}")
         else:
-            print(f"Unmounted: {mount_point}")
-        self.mounted = False
+            print("Card is already mounted.")
 
-    def write(self, text, mount_point="/sd"):
-        """Writes to specified file at mount point."""
+    def unmount_sd(self):
+        if self.is_mounted:
+            try:
+                vfs.umount(self.mount_point)
+                self.sd_card = None
+                self.vfs = None
+                self.is_mounted = False
+            except OSError as e:
+                print(f"Unable to unmount: {e}")
+        else:
+            print("Card is not mounted.")
+
+    def write_sd(self, data):
+        if not self.is_mounted:
+            print("Card is not mounted.")
+            return
+
         try:
-            with open(f"{mount_point}/logger.txt",
-                      "a") as file:
-                file.write(text + "\n")
+            with open(self.filename, "a") as f:
+                f.write(data + "\n")
         except Exception as e:
             print(f"Error writing file: {e}")
         else:
             print("Wrote data.")
+
+    def read_sd(self):
+        if not self.is_mounted:
+            print("Card is not mounted.")
+
+        try:
+            with open(self.filename, "r") as f:
+                print(f.read())
+        except Exception as e:
+            print(f"Error reading file: {e}")
+        else:
+            print("Read data.")
