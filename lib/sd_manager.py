@@ -13,7 +13,8 @@ class SDManager:
         cs=13,
         baudrate=1_000_000,
         mnt="/mnt",
-        outfile="outfile.txt"
+        outfile="outfile.txt",
+        min_max_file="min_max.txt"
     ):
         self.spi = machine.SPI(
             spi_id,
@@ -31,6 +32,8 @@ class SDManager:
         self.is_mounted = False
         self.outfile = outfile
         self.filename = f"{self.mount_point}/{self.outfile}"
+        self.min_max_file = min_max_file
+        self.min_max = f"{self.mount_point}/{self.min_max_file}"
 
     def mount_sd(self):
         if not self.is_mounted:

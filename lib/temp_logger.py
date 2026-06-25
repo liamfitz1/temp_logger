@@ -24,13 +24,16 @@ class TempLogger:
         print(f"LOCAL TIME: {self.get_date()}")
         self.__sd_card.mount_sd()
 
+
     def __str__(self):
         """String output."""
         return (f"{self.__location}\n"
                 f"{str(self.__dht.get_temp_c())}*C,\n"
                 f"{str(self.to_fahrenheit(self.__dht.get_temp_c()))}*F,\n"
                 f"{str(self.__dht.get_humidity())}%\n"
-                f"{self.get_date()}"
+                f"{self.get_date()}\n"
+                f"Min: {self.__dht.get_min()}*C\n"
+                f"Max: {self.__dht.get_max()}*C\n"
         )
 
     def to_fahrenheit(self, celsius):
@@ -83,3 +86,21 @@ class TempLogger:
     
     def is_mounted(self):
         return self.__sd_card.is_mounted
+    
+    def write_min_max(self):
+        if self.__sd_card.is_mounted:
+            try:
+                with open(self.__sd_card.min_max_file, 'w') as outfile:
+                    (min, max) = (self.__dht.get_min(), self.__dht.get_max())
+                    outfile.write(f"{min},{max}")
+            except OSError as e:
+                print(f"Exception: {e}")
+                
+    def read_min_max(self):
+        if self.__sd_card.is_mounted:
+            try:
+                with open(self.__sd_card.min_max_file, 'r') as infile:
+                    (min, max) = infile.read().split(',')
+                    print(f"min: {min}, max: {max}")
+            except OSError as e:
+                print(f"Exception: {e}")

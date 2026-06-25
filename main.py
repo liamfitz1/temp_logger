@@ -35,7 +35,6 @@ async def index(request):
     """Index function."""
     debug_led(led)
     return str(logger)
-    #return Template('index.html').render(logger=str(logger))
 
 
 @app.route('/api/v1/json')
@@ -48,21 +47,19 @@ async def json(request):
 async def csv(request):
     with open(logger.__sd_card.filename, 'r') as f:
         data = f.read()
-
-    return Response(
-        data,
-        headers={
-            'Content-Type': 'text/csv'
-        }
-    )
+    return Response(data,
+                    headers={'Content-Type': 'text/csv'})
 
 async def background_loop():
     """Background loop to continually log to CSV file."""
     if logger.is_mounted():
+        logger.read_min_max()
         while True:
             try:
                 logger.to_csv()
                 print("logged to CSV file.")
+                debug_led(led)
+                logger.write_min_max()
                 debug_led(led)
             except OSError as e:
                 print(f"Background error: {e}")

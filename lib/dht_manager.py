@@ -18,6 +18,8 @@ class DHTManager:
         self.__last_measure = time.ticks_ms()
         self.__temperature = None
         self.__humidity = None
+        self.__min_temp = None
+        self.__max_temp = None
         self._ensure_measure()
 
     def _ensure_measure(self, retries=5):
@@ -34,6 +36,9 @@ class DHTManager:
                 else:
                     print("Measurement OK:",
                           self.__temperature, self.__humidity)
+                    self.set_min(self.__temperature)
+                    self.set_max(self.__temperature)
+                    print(self.__temperature)
                     break
             else:
                 time.sleep(2)
@@ -52,3 +57,23 @@ class DHTManager:
         """Getter returns humidity %."""
         self._ensure_measure()
         return self.__humidity
+
+    def get_min(self):
+        if self.__min_temp:
+            return self.__min_temp
+        else:
+            return None
+        
+    def set_min(self, current):
+        if self.__min_temp == None or float(current) < self.__min_temp:
+            self.__min_temp = current
+    
+    def get_max(self):
+        if self.__max_temp:
+            return self.__max_temp
+        else:
+            return None
+        
+    def set_max(self, current):
+        if self.__max_temp == None or float(current) > self.__max_temp:
+            self.__max_temp = current
