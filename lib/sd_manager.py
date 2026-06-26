@@ -12,7 +12,7 @@ class SDManager:
         miso=12,
         cs=13,
         baudrate=1_000_000,
-        mnt="/mnt",
+        mnt="/sd",
         outfile="outfile.txt",
         min_max_file="min_max.txt"
     ):
@@ -31,9 +31,9 @@ class SDManager:
         self.mount_point = mnt
         self.is_mounted = False
         self.outfile = outfile
-        self.filename = f"{self.mount_point}/{self.outfile}"
+        self.filename = "/sd/outfile.csv"
         self.min_max_file = min_max_file
-        self.min_max = f"{self.mount_point}/{self.min_max_file}"
+        self.min_max = "/sd/min_max_file.csv"
 
     def mount_sd(self):
         if not self.is_mounted:

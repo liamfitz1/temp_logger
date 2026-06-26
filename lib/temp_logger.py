@@ -61,7 +61,11 @@ class TempLogger:
                     outfile.write(
                         f"{self.__location},"
                         f"{temp_c},{temp_f},"
-                        f"{humidity},{current_time}\n"
+                        f"{humidity},{current_time},"
+                        f"{self.__dht.get_min()},"
+                        f"{self.to_fahrenheit(self.__dht.get_min())},"
+                        f"{self.__dht.get_max()},"
+                        f"{self.to_fahrenheit(self.__dht.get_max())}\n"
                     )
             except OSError as e:
                 print(f"Exception: {e}")
@@ -90,7 +94,7 @@ class TempLogger:
     def write_min_max(self):
         if self.__sd_card.is_mounted:
             try:
-                with open(self.__sd_card.min_max_file, 'w') as outfile:
+                with open(self.__sd_card.min_max, 'w+') as outfile:
                     (min, max) = (self.__dht.get_min(), self.__dht.get_max())
                     outfile.write(f"{min},{max}")
             except OSError as e:
@@ -99,8 +103,8 @@ class TempLogger:
     def read_min_max(self):
         if self.__sd_card.is_mounted:
             try:
-                with open(self.__sd_card.min_max_file, 'r') as infile:
+                with open(self.__sd_card.min_max, 'r+') as infile:
                     (min, max) = infile.read().split(',')
                     print(f"min: {min}, max: {max}")
             except OSError as e:
-                print(f"Exception: {e}")
+                print(f"Exception in READ: {e} {self.__sd_card.min_max}")

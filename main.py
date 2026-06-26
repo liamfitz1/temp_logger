@@ -5,7 +5,6 @@ It logs to a CSV file, web interface, and a json end-point.
 """
 from temp_logger import TempLogger
 from microdot import Microdot, Response, send_file
-#from microdot.utemplate import Template
 import uasyncio
 import time
 import os
@@ -53,7 +52,11 @@ async def csv(request):
 async def background_loop():
     """Background loop to continually log to CSV file."""
     if logger.is_mounted():
-        logger.read_min_max()
+        try:
+            logger.read_min_max()
+        except Exception as e:
+            print(f"READ MIN MAX ERROR: {e}")
+            
         while True:
             try:
                 logger.to_csv()
@@ -72,6 +75,8 @@ async def main():
     """Runs automatically when the Pico initializes after boot."""
     print(f"Localtime sync: {time.localtime()}")
     print("Starting server...")
+    # FOR DEBUGGING PURPOSES write_min_max() before reading.
+    logger.write_min_max()
     uasyncio.create_task(background_loop())
     print("Started background_loop CSV logging...")
     await app.start_server(port=5000)
