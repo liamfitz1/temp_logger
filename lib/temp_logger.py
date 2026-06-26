@@ -34,6 +34,8 @@ class TempLogger:
                 f"{self.get_date()}\n"
                 f"Min: {self.__dht.get_min()}*C\n"
                 f"Max: {self.__dht.get_max()}*C\n"
+                f"Min *F: {self.to_fahrenheit(self.__dht.get_min())}*F\n"
+                f"Max *F: {self.to_fahrenheit(self.__dht.get_max())}*F\n"
         )
 
     def to_fahrenheit(self, celsius):
@@ -44,7 +46,11 @@ class TempLogger:
         """Output JSON."""
         return json.dumps({
             'celsius': self.__dht.get_temp_c(),
+            'min_celsius': self.__dht.get_min(),
+            'max_celsius': self.__dht.get_max(),
             'fahrenheit': self.to_fahrenheit(self.__dht.get_temp_c()),
+            'min_fahrenheit': self.to_fahrenheit(self.__dht.get_min()),
+            'max_fahrenheit': self.to_fahrenheit(self.__dht.get_max()),
             'humidity': self.__dht.get_humidity(),
             'date': self.get_date()
         })
