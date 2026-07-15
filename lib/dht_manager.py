@@ -1,79 +1,84 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed May 27 09:46:25 2026
-
-@author: Liam
-"""
 import time
 import machine
 import dht
+from machine import Pin
 
+led = Pin("LED", Pin.OUT)
+def blink_led(led):
+    for _ in range(3):
+        led.on()
+        time.sleep(1)
+        led.off()
 
 class DHTManager:
-    """DHT Module reads temperature and humidity."""
-
+    
     def __init__(self, gpio_pin):
         self.sensor = dht.DHT11(machine.Pin(gpio_pin))
-        self.__last_measure = time.ticks_ms()
-        self.__temperature = None
-        self.__humidity = None
-        self.__min_temp = None
-        self.__max_temp = None
-        self._ensure_measure()
-
-    def _ensure_measure(self, retries=5):
-        """Function delays reading from the DHT Module to prevent errors."""
+        self.temperature = None
+        self.humidity = None
+        self.min_temp = None
+        self.max_temp = None
+        self.__last_measure = 0
+        self._measure()
+        
+    def _measure(self, retries=5):
+#         blink_led(led)
         for _ in range(retries):
             if time.ticks_diff(time.ticks_ms(), self.__last_measure) >= 2000:
                 try:
                     self.sensor.measure()
-                    self.__temperature = self.sensor.temperature()
-                    self.__humidity = self.sensor.humidity()
+                    self.temperature = self.sensor.temperature()
+                    self.humidity = self.sensor.humidity()
+                    if self.min_temp == None or self.temperature < self.min_temp:
+                        self.min_temp = self.temperature
+                    if self.max_temp == None or self.temperature > self.max_temp:
+                        self.max_temp = self.temperature
                     self.__last_measure = time.ticks_ms()
                 except OSError as e:
                     print(f"DHT read failed: {e}")
                 else:
-                    print("Measurement OK:",
-                          self.__temperature, self.__humidity)
-                    self.set_min(self.__temperature)
-                    self.set_max(self.__temperature)
-                    print(self.__temperature)
+                    print(f"Measurement OK: {self.temperature} {self.humidity}")
+                    print(f"Min/Max OK: {self.min_temp} {self.max_temp}")
+                    print(f"Last Measure: {self.__last_measure}")
                     break
             else:
                 time.sleep(2)
-
+                
     def get_temp_c(self):
-        """Getter which returns temperature as C."""
-        self._ensure_measure()
-        return self.__temperature
-
+        if self.temperature != None:
+            return self.temperature
+        return False
+    
     def get_temp_f(self):
-        """Getter which returns temperature as C, to convert to F."""
-        self._ensure_measure()
-        return self.__temperature
-
+        if self.temperature != None:
+            return float(self.temperature) * 9.0 / 5.0 + 32.0
+        return False
+    
     def get_humidity(self):
-        """Getter returns humidity %."""
-        self._ensure_measure()
-        return self.__humidity
-
+        if self.humidity != None:
+            return self.humidity
+        return False
+    
     def get_min(self):
-        if self.__min_temp:
-            return self.__min_temp
-        else:
-            return None
-        
-    def set_min(self, current):
-        if self.__min_temp == None or float(current) < self.__min_temp:
-            self.__min_temp = current
+        if self.min_temp:
+            return self.min_temp
+        return None
     
     def get_max(self):
-        if self.__max_temp:
-            return self.__max_temp
-        else:
-            return None
-        
-    def set_max(self, current):
-        if self.__max_temp == None or float(current) > self.__max_temp:
-            self.__max_temp = current
+        if self.max_temp:
+            return self.max_temp
+        return None
+    
+    def to_f(self, celcius):
+        return float(celcius) * 9.0 / 5.0 + 32.0
+
+if __name__ == "__main__":
+    dht_manager = DHTManager(gpio_pin=15)
+    dht_manager._measure()
+    print(f"Temp C: {dht_manager.get_temp_c()}")
+    print(f"Temp F: {dht_manager.get_temp_f()}")
+    print(f"Humidity: {dht_manager.get_humidity()}")
+    print(f"Min Temp C: {dht_manager.get_min()}")
+    print(f"Max Temp C: {dht_manager.get_max()}")
+    print(f"Min Temp F: {dht_manager.to_f(dht_manager.get_min())}")
+    print(f"Max Temp F: {dht_manager.to_f(dht_manager.get_max())}")

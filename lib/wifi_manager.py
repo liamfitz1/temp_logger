@@ -4,47 +4,51 @@ import network
 
 
 class WifiManager:
-    def __init__(self, ssid, password, retries=10, delay=2):
+    def __init__(self, ssid, password, delay=2):
         self.ssid = ssid
         self.password = password
-        self.retries = retries
         self.delay = delay
+        self.ip = None
+        self.utc_time = None
+        self.actual_time = None
+        self.UTC_OFFSET = -7 * 60 * 60
+    
+    def connect(self):
         self.wlan = network.WLAN(network.STA_IF)
-
-    def connect(self, timeout_s=20):
         self.wlan.active(True)
-
-        if not self.wlan.isconnected():
-            print(f"Connecting to {self.ssid}...")
-            self.wlan.connect(self.ssid, self.password)
-
-        start = time.ticks_ms()
+        self.wlan.connect(self.ssid, self.password)
         while not self.wlan.isconnected():
-            if time.ticks_diff(time.ticks_ms(), start) > timeout_s * 1000:
-                print("WiFi connect timed out")
-                return False
-            time.sleep(0.5)
-
-        print(f"Connected to {self.ssid}!")
-        # Sets RTC to UTC
-        try:
-            ntptime.settime()
-            print("NTP (UTC) time:", time.localtime())
-        except Exception as e:
-            print("NTP failed:", e)
-
-        return True
-
-    def disconnect(self):
-        while self.wlan.isconnected():
-            print(f"Disconnecting from {self.ssid}...")
-            self.wlan.disconnect()
+            print("Waiting for connection...")
             time.sleep(self.delay)
-        print(f"Disconnected from {self.ssid}!")
-        self.wlan.active(False)
-        return self.wlan.isconnected()
-
+            
+        self.ip = self.wlan.ifconfig()[0]
+        print(f"Connected on: {self.ip}")
+        
+        while True:
+            try:
+                ntptime.settime()
+                print(f"NTP (UTC) Time: {time.localtime()}")
+                self.utc_time = time.localtime()
+            except Exception as e:
+                print(f"NTP Failed: {e}")
+                time.sleep(5)
+            else:
+                self.actual_time = time.localtime(time.time() + self.UTC_OFFSET)
+                print(f"LOCAL TIME: {self.actual_time}")
+                break
+        
+        return self.ip
+    
     def ip_addr(self):
-        if self.wlan.isconnected():
-            return self.wlan.ifconfig()[0]
+        if self.wlan.isconnected() and self.ip != None:
+            return self.ip
         return None
+    
+    def get_actual_time(self):
+        self.actual_time = time.localtime(time.time() + self.UTC_OFFSET)
+        return self.actual_time
+    
+if __name__ == "__main__":
+    wifi_man = WifiManager("change_me","change_me")
+    wifi_man.connect()
+    print(f"IP: {wifi_man.ip_addr()}")

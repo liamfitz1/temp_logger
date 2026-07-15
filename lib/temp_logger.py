@@ -1,6 +1,3 @@
-"""
-Main object of the program.  Handles temperature sensor data and output.
-"""
 import secrets
 import json
 import time
@@ -8,109 +5,72 @@ import time
 from wifi_manager import WifiManager
 from dht_manager import DHTManager
 from sd_manager import SDManager
+from machine import Pin
 
-
+led = Pin("LED", Pin.OUT)
+def blink_led(led, count=1):
+    for _ in range(count):
+        led.on()
+        time.sleep(1)
+        led.off()
+    
 class TempLogger:
-    """Main object for the program."""
 
     def __init__(self, location="Default", sleep_min=1):
-        """Initialize the logger."""
-        self.__wifi = WifiManager(secrets.ssid, secrets.password)
-        self.__dht = DHTManager(gpio_pin=15)
-        self.__sd_card = SDManager(baudrate=1_000_000)
-        self.__location = location
-        self.__sleep_min = sleep_min
-        self.__wifi.connect()
-        print(f"LOCAL TIME: {self.get_date()}")
-        self.__sd_card.mount_sd()
-
-
+        self.wifi = WifiManager(secrets.ssid, secrets.password, delay=2)
+#         blink_led(led, 2)
+        self.dht = DHTManager(gpio_pin=15)
+#         blink_led(led, 3)
+        self.sd_card = SDManager(baudrate=1_000_000)
+#         blink_led(led, 4)
+        self.location = location
+        self.sleep_min = sleep_min * 60
+        
+#         blink_led(led, 5)
+        self.wifi.connect()
+#         blink_led(led, 6)
+        self.sd_card.mount_sd()
+        
+        with open(f"{self.sd_card.mount_point}/logger.csv", "a") as f:
+            pass
+        
     def __str__(self):
-        """String output."""
-        return (f"{self.__location}\n"
-                f"{str(self.__dht.get_temp_c())}*C,\n"
-                f"{str(self.to_fahrenheit(self.__dht.get_temp_c()))}*F,\n"
-                f"{str(self.__dht.get_humidity())}%\n"
-                f"{self.get_date()}\n"
-                f"Min: {self.__dht.get_min()}*C\n"
-                f"Max: {self.__dht.get_max()}*C\n"
-                f"Min *F: {self.to_fahrenheit(self.__dht.get_min())}*F\n"
-                f"Max *F: {self.to_fahrenheit(self.__dht.get_max())}*F\n"
+        return (
+            f"Temp C: {self.dht.get_temp_c()}\n"
+            f"Temp F: {self.dht.get_temp_f()}\n"
+            f"Humidity: {self.dht.get_humidity()}\n"
+            f"Min C: {self.dht.get_min()}\n"
+            f"Min F: {self.dht.to_f(self.dht.get_min())}\n"
+            f"Max C: {self.dht.get_max()}\n"
+            f"Max F: {self.dht.to_f(self.dht.get_max())}\n"
+            f"Time: {self.wifi.get_actual_time()}\n"
         )
-
-    def to_fahrenheit(self, celsius):
-        """Calculte fahrenheit based on celsius."""
-        return celsius * 9.0 / 5.0 + 32.0
-
+    
     def to_json(self):
-        """Output JSON."""
         return json.dumps({
-            'celsius': self.__dht.get_temp_c(),
-            'min_celsius': self.__dht.get_min(),
-            'max_celsius': self.__dht.get_max(),
-            'fahrenheit': self.to_fahrenheit(self.__dht.get_temp_c()),
-            'min_fahrenheit': self.to_fahrenheit(self.__dht.get_min()),
-            'max_fahrenheit': self.to_fahrenheit(self.__dht.get_max()),
-            'humidity': self.__dht.get_humidity(),
-            'date': self.get_date()
+            'celsius': self.dht.get_temp_c(),
+            'fahrenheit': self.dht.to_f(self.dht.get_temp_c()),
+            'humidity': self.dht.get_humidity(),
+            'time': self.wifi.get_actual_time(),
+            'max_f': self.dht.to_f(self.dht.get_max()),
+            'min_f': self.dht.to_f(self.dht.get_min()),
+            'max_c': self.dht.get_max(),
+            'min_c': self.dht.get_min()
         })
-
+    
     def to_csv(self):
-        """Writes to a CSV file."""
-        if self.__sd_card.is_mounted:
-            try:
-                with open(self.__sd_card.filename, 'a') as outfile:
-                    temp_c = self.__dht.get_temp_c()
-                    temp_f = self.to_fahrenheit(temp_c)
-                    humidity = self.__dht.get_humidity()
-                    current_time = self.get_date()
-                    outfile.write(
-                        f"{self.__location},"
-                        f"{temp_c},{temp_f},"
-                        f"{humidity},{current_time},"
-                        f"{self.__dht.get_min()},"
-                        f"{self.to_fahrenheit(self.__dht.get_min())},"
-                        f"{self.__dht.get_max()},"
-                        f"{self.to_fahrenheit(self.__dht.get_max())}\n"
-                    )
-            except OSError as e:
-                print(f"Exception: {e}")
-        else:
-            print("Not mounted. write()")
-
-    def get_location(self):
-        """Getter for location."""
-        return self.__location
-
-    def get_ip(self):
-        """Getter for IP."""
-        return self.__wifi.ip_addr()
-
-    def get_date(self):
-        """Getter for date."""
-        (year, month, day, hour, minute, second) = time.localtime()[:6]
-        return f"{month:02}/{day:02}/{year},{hour:02}:{minute:02}:{second:02}"
-
-    def get_sleep(self):
-        return 60 * self.__sleep_min
+#         blink_led(led)
+        return (
+            f"{self.location},"
+            f"{self.dht.get_temp_c()},"
+            f"{self.dht.to_f(self.dht.get_temp_c())},"
+            f"{self.dht.get_humidity()},"
+            f"{self.dht.get_min()},"
+            f"{self.dht.get_max()},"
+            f"{self.wifi.get_actual_time()}"
+        )
     
-    def is_mounted(self):
-        return self.__sd_card.is_mounted
-    
-    def write_min_max(self):
-        if self.__sd_card.is_mounted:
-            try:
-                with open(self.__sd_card.min_max, 'w+') as outfile:
-                    (min, max) = (self.__dht.get_min(), self.__dht.get_max())
-                    outfile.write(f"{min},{max}")
-            except OSError as e:
-                print(f"Exception: {e}")
-                
-    def read_min_max(self):
-        if self.__sd_card.is_mounted:
-            try:
-                with open(self.__sd_card.min_max, 'r+') as infile:
-                    (min, max) = infile.read().split(',')
-                    print(f"min: {min}, max: {max}")
-            except OSError as e:
-                print(f"Exception in READ: {e} {self.__sd_card.min_max}")
+if __name__ == "__main__":
+    temp_logger = TempLogger("Office",1)
+    print(f"{temp_logger.to_json()}")
+    print(f"{temp_logger.to_csv()}")
